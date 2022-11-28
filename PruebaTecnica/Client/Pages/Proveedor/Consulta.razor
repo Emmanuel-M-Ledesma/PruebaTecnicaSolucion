@@ -1,0 +1,195 @@
+﻿@page "/proveedor/consulta/{ProvID:int}"
+
+@inject IHttpService http
+
+
+<h3>Consulta de pedidos</h3>
+
+<select @onchange="selectEstado">
+    <optgroup label="Estado">
+        <option>Pendiente</option>
+        <option>Finalizado</option>
+    </optgroup>
+</select>
+<input type="date" @onchange="inpDesde" />
+<input type="date" @onchange="inpHasta" />
+<button class="btn alert-primary" @onclick="btn_click">Buscar pedidos</button>
+<table>
+
+
+    @if (totalModel != null)
+    {
+        <tr>
+            <th>Estado</th>
+            <th>Fecha</th>
+            <th>Descripcion</th>
+            <th>Monto</th>
+            <th>Total</th>
+            <th>Comision</th>
+
+        </tr>
+        @foreach (var item in totalModel.pedidos)
+        {
+            @if (item.IdEstado == 1)
+            {
+                itemEst = "Pendiente";
+            }
+            else
+            {
+                itemEst = "Finalizado";
+            }
+            <tr>
+                <td>@itemEst</td>
+                <td>@item.Fecha</td>
+                <td>@item.Descripcion</td>
+                <td>@item.Monto</td>
+                <td></td>
+                <td></td>
+            </tr>
+        }
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>@totalModel.SumaTotal</td>
+            <td>@totalModel.ComisionProveedor</td>
+        </tr>
+    }
+    else if (pedidos == null && totalModel == null)
+    {
+        <tr>
+            <th>Estado</th>
+            <th>Fecha</th>
+            <th>Descripcion</th>
+            <th>Monto</th>
+        </tr>
+        <tr>No hay pedidos</tr>
+    }
+</table>
+
+
+@code {
+    List<Pedido> pedidos;
+    TotalModel totalModel;
+    Usuario user = new();
+    string token, itemEst, desde, hasta;
+    string Estado = "Pendiente";
+
+    [Parameter] public int ProvID { get; set; }
+    ElementReference slEstado;
+    protected override async Task OnInitializedAsync()
+    {
+        base.OnInitialized();
+        await Buscar();
+        await Leer(token, "Pendiente");
+    }
+
+    private async Task Leer(string tk, string estado)
+    {
+        var respHttp = await http.Get2<TotalModel>("api/pedidos/" + estado, tk);
+        if (!respHttp.Error)
+        {
+            totalModel = respHttp.Respuesta;
+        }
+    }
+
+    private async Task<string> Buscar()
+    {
+        var respHttp = await http.Get<Usuario>($"api/proveedores/{ProvID}");
+        if (!respHttp.Error)
+        {
+            user = respHttp.Respuesta;
+        }
+        token = Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes($"{user.User}:{user.Pass}"));
+        return token;
+    }
+
+    private void selectEstado(ChangeEventArgs e)
+    {
+        Estado = (e.Value.ToString());
+        
+    }
+    private void inpDesde(ChangeEventArgs e)
+    {
+        desde = DateTime.Parse(e.Value.ToString()).ToString("MM/dd/yyyy");
+    }
+    private void inpHasta(ChangeEventArgs e)
+    {
+        hasta = DateTime.Parse(e.Value.ToString()).ToString("MM/dd/yyyy");
+    }
+    private async Task btn_click()
+    {
+
+        if (desde != "" && hasta != "")
+        {
+            var respHttp = await http.Get2<TotalModel>("api/pedidos/" + Estado + "?FechaDesde=" + desde + "&FechaHasta=" + hasta, token);
+            if (!respHttp.Error)
+            {                
+                totalModel = respHttp.Respuesta;
+            }
+            else
+            {
+                totalModel = null;
+            }
+            
+            
+        }
+        if (desde == "" && hasta != "")
+        {
+           
+            var respHttp = await http.Get2<TotalModel>("api/pedidos/" + Estado + "?FechaHasta=" + hasta, token);
+            if (!respHttp.Error)
+            {
+                totalModel = respHttp.Respuesta;
+            }
+            else
+            {
+                totalModel = null;
+            }
+        }
+        if (desde != "" && hasta == "")
+        {
+            var respHttp = await http.Get2<TotalModel>("api/pedidos/" + Estado + "?FechaDesde=" + desde, token);
+            if (!respHttp.Error)
+            {
+                totalModel = respHttp.Respuesta;
+            }
+            else
+            {
+                totalModel = null;
+            }
+        }
+        if (desde == "" && hasta == "")
+        {
+            var respHttp = await http.Get2<TotalModel>("api/pedidos/" + Estado, token);
+            if (!respHttp.Error)
+            {
+                totalModel = respHttp.Respuesta;
+            }
+            else
+            {
+                totalModel = null;
+            }
+        }
+        
+    }
+
+}
+<style>
+    table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 80%;
+    }
+
+    td, th {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+
+    tr:nth-child(even) {
+        background-color: #dddddd;
+    }
+</style>

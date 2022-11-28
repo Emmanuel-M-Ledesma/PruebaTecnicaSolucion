@@ -1,0 +1,70 @@
+﻿@page "/"
+@inject IHttpService http
+
+<PageTitle>Lista Proveedores</PageTitle>
+
+<h4>Lista de proveedores</h4>
+
+<table>
+    <tr>
+        <th>Nombre</th>
+        <th>Comision %</th>
+    </tr>
+    @if (proveedores == null)
+    {
+        <tr>Cargando...</tr>
+    }
+    else if (proveedores.Count == 0)
+    {
+        <tr>No hay proveedores cargados</tr>
+    }
+    else
+    {
+        foreach (var item in proveedores)
+        {
+            <tr>
+                <td>@item.Nombre</td>
+                <td>@item.Comision</td>
+                <td><a class="btn btn-primary" href="/proveedor/consulta/@item.IdProveedor">Consultas</a></td>
+            </tr>
+        }
+    }
+</table>
+
+@code {
+    List<PruebaTecnica.Shared.Models.Proveedor> proveedores = new();    
+
+    protected override async Task OnInitializedAsync()
+    {
+        base.OnInitialized();
+        await Leer();
+    }
+
+    private async Task Leer()
+    {
+        var respHttp = await http.Get<List<PruebaTecnica.Shared.Models.Proveedor>>("api/proveedores");
+        if (!respHttp.Error)
+        {
+            proveedores = respHttp.Respuesta;
+        }
+    }
+}
+
+
+<style>
+    table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 50%;
+    }
+
+    td, th {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+
+    tr:nth-child(even) {
+        background-color: #dddddd;
+    }
+</style>
