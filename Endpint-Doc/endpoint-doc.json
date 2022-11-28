@@ -221,6 +221,46 @@
           }
         }
       }
+    },
+    "/api/proveedores/{id}": {
+      "get": {
+        "tags": [
+          "Proveedor"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Usuario"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Usuario"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Usuario"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -241,7 +281,8 @@
             "items": {
               "$ref": "#/components/schemas/Pedido"
             },
-            "nullable": true
+            "nullable": true,
+            "readOnly": true
           }
         },
         "additionalProperties": false
@@ -255,8 +296,7 @@
           },
           "idProveedor": {
             "type": "integer",
-            "format": "int32",
-            "nullable": true
+            "format": "int32"
           },
           "idSucursal": {
             "type": "integer",
@@ -312,7 +352,8 @@
             "items": {
               "$ref": "#/components/schemas/Pedido"
             },
-            "nullable": true
+            "nullable": true,
+            "readOnly": true
           }
         },
         "additionalProperties": false
@@ -337,14 +378,16 @@
             "items": {
               "$ref": "#/components/schemas/ProvSuc"
             },
-            "nullable": true
+            "nullable": true,
+            "readOnly": true
           },
           "usuarios": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Usuario"
             },
-            "nullable": true
+            "nullable": true,
+            "readOnly": true
           }
         },
         "additionalProperties": false
@@ -365,7 +408,8 @@
             "items": {
               "$ref": "#/components/schemas/Sucursal"
             },
-            "nullable": true
+            "nullable": true,
+            "readOnly": true
           }
         },
         "additionalProperties": false
@@ -401,7 +445,8 @@
             "items": {
               "$ref": "#/components/schemas/ProvSuc"
             },
-            "nullable": true
+            "nullable": true,
+            "readOnly": true
           }
         },
         "additionalProperties": false
